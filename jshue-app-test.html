@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hue</title>
+
+  <script src="node_modules/jshue/src/jshue.js"></script>
+</head>
+<body>
+<script>
+  // ==============
+  // test jshue app
+  // https://github.com/blargoner/jshue
+  // ==============
+
+  var hue = jsHue();
+  var user = null;
+
+  hue.discover().then(bridges => {
+    if(bridges.length === 0) {
+      console.log('No bridges found. :(');
+    }
+    else {
+      bridges.forEach(b => {
+        console.log('Bridge found at IP address %s.', b.internalipaddress);
+        var bridge = hue.bridge(b.internalipaddress);
+
+        // create user account (requires link button to be pressed)
+        /*bridge.createUser('myApp#testdevice').then(data => {
+          // extract bridge-generated username from returned data
+          var username = data[0].success.username;
+
+          console.log('New username:', username);
+
+          // instantiate user object with username
+          var user = bridge.user(username); // T6gWbx989lZD-8mKGfNNyhftnrT5tEFRtLp8bo0P
+        });*/
+
+        var userId = 'T6gWbx989lZD-8mKGfNNyhftnrT5tEFRtLp8bo0P';
+        user = bridge.user(userId);
+        user.getConfig().then(config => {
+          if(config.ipaddress) {
+            window.document.getElementById('connection').innerText = 'User ' + userId + ' connected to the hue bridge';
+          }
+          else {
+            window.document.getElementById('connection').innerText = 'User not authorized (need to create new user on hue bridge)';
+          }
+          console.log('Config = ', config);
+      });
+      });
+    }
+  }).catch(e => console.log('Error finding bridges', e));
+
+  function light1(on) {
+    user.setLightState(1, { on: on })
+  }
+</script>
+<div id="connection"></div>
+<button onclick="light1(true)">ON</button>
+<button onclick="light1(false)">OFF</button>
+</body>
+</html>

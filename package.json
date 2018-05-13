@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/palevasseur/hue#readme",
   "dependencies": {
-    "jshue": "^2.1.1"
+    "jshue": "^2.1.1",
+    "node-hue-api": "^2.4.2"
   }
 }
