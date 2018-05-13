@@ -1,0 +1,23 @@
+{
+  "name": "hue",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/palevasseur/hue.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/palevasseur/hue/issues"
+  },
+  "homepage": "https://github.com/palevasseur/hue#readme",
+  "dependencies": {
+    "jshue": "^2.1.1"
+  }
+}
