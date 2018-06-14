@@ -16,9 +16,9 @@ hue.nupnpSearch().then(bridges => {
         api = new hue.HueApi(bridge.ipaddress, userId);
         api.getConfig()
             .then(conf => {
-                //console.log('Config: ' + JSON.stringify(conf, null, 2));
-                //api.registeredUsers().then(users => console.log('Users: ' + JSON.stringify(users, null, 2)));
-                //api.getFullState().then(states => console.log('States: ' + JSON.stringify(states, null, 2)));
+                console.log('Config: ' + JSON.stringify(conf, null, 2));
+                api.registeredUsers().then(users => console.log('Users: ' + JSON.stringify(users, null, 2)));
+                api.getFullState().then(states => console.log('States: ' + JSON.stringify(states, null, 2)));
 
                 // light 1 off, then on
                 const state = hue.lightState.create();
@@ -59,6 +59,7 @@ aqara.on('gateway', (gateway) => {
 
         const links = new Links();
         links.add(new Link(DeviceID.switch1, LightId.bureau));
+        links.add(new Link(DeviceID.switchDouble1, LightId.canape));
 
         switch (device.getType()) {
             case 'switch':
@@ -68,10 +69,12 @@ aqara.on('gateway', (gateway) => {
                     links.action(device.getSid(), step);
                 });
                 device.on('clickLeft', (step) => {
-                    console.log(`${device.getSid()} left button is clicked, step ${step}`)
+                    console.log(`${device.getSid()} left button is clicked, step ${step}`);
+                    links.action(device.getSid(), step);
                 });
                 device.on('clickRight', (step) => {
-                    console.log(`${device.getSid()} right button is clicked, step ${step}`)
+                    console.log(`${device.getSid()} right button is clicked, step ${step}`);
+                    links.action(device.getSid(), step);
                 });
         }
     });
@@ -88,7 +91,8 @@ const DeviceID = {
 
 const LightId = {
     salon: 1,
-    bureau: 2
+    bureau: 2,
+    canape: 3
 };
 
 class Links {
