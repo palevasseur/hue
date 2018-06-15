@@ -3,7 +3,7 @@ import * as hue from "node-hue-api";
 const userId = 'T6gWbx989lZD-8mKGfNNyhftnrT5tEFRtLp8bo0P';
 
 // https://github.com/palevasseur/node-lumi-aqara
-import {Aqara} from "./deps/lumi-aqara";
+import {Aqara} from "./lumi-aqara";
 
 // ==============
 // Hue lights
@@ -35,6 +35,29 @@ hue.nupnpSearch().then(bridges => {
 
 // =================
 // Xiaomi buttons
+
+const DeviceID = {
+    switch1: '158d0001833eb0',
+    switch2_left: '158d0001f3f503_left',
+    switch2_right: '158d0001f3f503_right'
+};
+
+const LightId = {
+    salon: 1,
+    bureau: 2,
+    canape: 3
+};
+
+function createLinks() {
+    const links = new Links();
+    links.add(new Link(DeviceID.switch1, LightId.bureau));
+    links.add(new Link(DeviceID.switch2_left, LightId.canape));
+    links.add(new Link(DeviceID.switch2_right, LightId.salon));
+
+    return links;
+}
+
+// ----
 const aqara = new Aqara();
 aqara.on('gateway', (gateway) => {
     console.log('Gateway discovered');
@@ -57,23 +80,13 @@ aqara.on('gateway', (gateway) => {
         console.log(`  Type: ${device.getType()}`);
         console.log(`  SID: ${device.getSid()}`);
 
-        const links = new Links();
-        links.add(new Link(DeviceID.switch1, LightId.bureau));
-        links.add(new Link(DeviceID.switchDouble1, LightId.canape));
+        const links = createLinks();
 
         switch (device.getType()) {
             case 'switch':
                 console.log(`  Switch`);
                 device.on('click', (step) => {
                     console.log(`${device.getSid()} is clicked, step ${step}`);
-                    links.action(device.getSid(), step);
-                });
-                device.on('clickLeft', (step) => {
-                    console.log(`${device.getSid()} left button is clicked, step ${step}`);
-                    links.action(device.getSid(), step);
-                });
-                device.on('clickRight', (step) => {
-                    console.log(`${device.getSid()} right button is clicked, step ${step}`);
                     links.action(device.getSid(), step);
                 });
         }
@@ -84,26 +97,27 @@ aqara.on('gateway', (gateway) => {
     })
 });
 
-const DeviceID = {
-    switch1: '158d0001833eb0',
-    switchDouble1: '158d0001f3f503'
-};
-
-const LightId = {
-    salon: 1,
-    bureau: 2,
-    canape: 3
-};
-
 class Links {
     private links = [];
 
     add(link) {
+        const device = this.links[link.deviceSid];
+        if(device) {
+            console.log(`Links: device ${link.deviceSid} already defined, check Link definition`);
+            return;
+        }
+
         this.links[link.deviceSid] = link;
     }
 
     action(deviceSid, step) {
-        this.links[deviceSid].action(step);
+        const device = this.links[deviceSid];
+        if(!device) {
+            console.log(`Links: device ${deviceSid} not found, check Link definition`);
+            return;
+        }
+
+        device.action(step);
     }
 }
 
