@@ -5,7 +5,7 @@ const userId = 'T6gWbx989lZD-8mKGfNNyhftnrT5tEFRtLp8bo0P';
 export let hueApi = null;
 
 export function startHue() : Promise<any> {
-    return hueApi ? Promise.resolve(hueApi) : hue.nupnpSearch().then(bridges => {
+    return hueApi ? Promise.resolve() : hue.nupnpSearch().then(bridges => {
         if(bridges.length && bridges[0].ipaddress) {
             const bridge = bridges[0];
             console.log('Hue Bridges Found: ' + JSON.stringify(bridge));
@@ -27,8 +27,6 @@ export function startHue() : Promise<any> {
                 .catch(err => {
                     console.log('Error: ' + err);
                 });
-
-            return hueApi;
         }
     });
 }

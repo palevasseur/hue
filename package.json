@@ -19,6 +19,7 @@
   "homepage": "https://github.com/palevasseur/hue#readme",
   "dependencies": {
     "jshue": "^2.1.1",
+    "lumi-aqara": "git+https://github.com/palevasseur/node-lumi-aqara.git",
     "node-hue-api": "^2.4.2"
   }
 }

@@ -26,7 +26,7 @@ startHue().then(_ => {
     links.add(new Link(DeviceID.switch2_right, LightId.salon));
 
     startAqara(links).then(_ => {
-        console.log('AQARA initialized');
+        console.log('HUE + AQARA initialized');
     });
 });
 
