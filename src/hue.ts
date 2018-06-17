@@ -1,5 +1,6 @@
 // https://github.com/peter-murray/node-hue-api
 import * as hue from "node-hue-api";
+import {Light} from "./links";
 const userId = 'T6gWbx989lZD-8mKGfNNyhftnrT5tEFRtLp8bo0P';
 
 export let hueApi = null;
@@ -29,4 +30,24 @@ export function startHue() : Promise<any> {
                 });
         }
     });
+}
+
+export abstract class HueLight implements Light {
+    protected state = {
+        on: false,
+        brightness: 100
+    };
+
+    constructor(readonly lightId: number) {
+    }
+
+    abstract execute(step: number);
+
+    protected setState(state) {
+        Object.keys(state).forEach(key => {
+            this.state[key] = state[key];
+        });
+
+        hueApi.setLightState(this.lightId, state).then(res => console.log(`Light on=${this.state.on} brightness=${this.state.brightness}%`));
+    }
 }

@@ -1,6 +1,6 @@
 import {Link, Links} from "./src/links";
 import {startAqara} from "./src/aqara";
-import {startHue} from "./src/hue";
+import {HueLight, startHue} from "./src/hue";
 
 // ================
 // Xiaomi buttons
@@ -21,12 +21,23 @@ const LightId = {
 
 startHue().then(_ => {
     const links = new Links();
-    links.add(new Link(DeviceID.switch1, LightId.bureau));
-    links.add(new Link(DeviceID.switch2_left, LightId.canape));
-    links.add(new Link(DeviceID.switch2_right, LightId.salon));
+    links.add(new Link(DeviceID.switch1, new HueLightStepBrightness(LightId.bureau)));
+    links.add(new Link(DeviceID.switch2_left, new HueLightStepBrightness(LightId.canape)));
+    links.add(new Link(DeviceID.switch2_right, new HueLightStepBrightness(LightId.salon)));
 
     startAqara(links).then(_ => {
         console.log('HUE + AQARA initialized');
     });
 });
 
+class HueLightStepBrightness extends HueLight {
+    execute(step) {
+        switch(step) {
+            case 1: this.setState(this.state.on ? {on: false} : {brightness: 100, on: true}); break;
+            case 2: this.setState({brightness: 50, on: true}); break;
+            case 3: this.setState({brightness: 30, on: true}); break;
+            case 4: this.setState({brightness: 5, on: true}); break;
+            default: this.setState({on: false});
+        }
+    }
+}
