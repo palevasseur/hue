@@ -32,10 +32,17 @@ export function startHue() : Promise<any> {
     });
 }
 
+export interface ILightState {
+    on?: boolean,
+    bri?: number, // 0-254
+    reachable?: boolean,
+    name?: string
+}
+
 export abstract class HueLight implements Light {
-    protected state = {
+    protected state: ILightState = {
         on: false,
-        brightness: 100
+        bri: 254
     };
 
     constructor(readonly lightId: number) {
@@ -43,11 +50,19 @@ export abstract class HueLight implements Light {
 
     abstract execute(step: number);
 
-    protected setState(state) {
+    protected setState(state: ILightState) {
         Object.keys(state).forEach(key => {
             this.state[key] = state[key];
         });
 
-        hueApi.setLightState(this.lightId, state).then(res => console.log(`Light on=${this.state.on} brightness=${this.state.brightness}%`));
+        hueApi.setLightState(this.lightId, state).then(res => console.log(`Light on=${this.state.on} bri=${this.state.bri}`));
+    }
+
+    public checkState() {
+        hueApi.lightStatus(this.lightId).then(({state, name}: {state:ILightState, name: string}) => {
+            let mes = `Light ${this.lightId} (${name}), state: on=${state.on}, bri=${state.bri}, reachable=${state.reachable}`;
+            mes += state.on == this.state.on && state.bri == this.state.bri ? '' : ` DON'T MATCH saved state: on=${this.state.on}, bri=${this.state.bri}`;
+            console.log(mes);
+         });
     }
 }

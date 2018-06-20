@@ -20,10 +20,16 @@ const LightId = {
 
 
 startHue().then(_ => {
+    const lightBureau = new HueLightStepBrightness(LightId.bureau);
+    const lightCanape = new HueLightStepBrightness(LightId.canape);
+    const lightSalon = new HueLightStepBrightness(LightId.salon);
+
     const links = new Links();
-    links.add(new Link(DeviceID.switch1, new HueLightStepBrightness(LightId.bureau)));
-    links.add(new Link(DeviceID.switch2_left, new HueLightStepBrightness(LightId.canape)));
-    links.add(new Link(DeviceID.switch2_right, new HueLightStepBrightness(LightId.salon)));
+    links.add(new Link(DeviceID.switch1, lightBureau));
+    links.add(new Link(DeviceID.switch2_left, lightCanape));
+    links.add(new Link(DeviceID.switch2_right, lightSalon));
+
+    setInterval(_ => {links.checkLightsState()}, 10 * 1000); // check state every minutes
 
     startAqara(links).then(_ => {
         console.log('HUE + AQARA initialized');
@@ -33,10 +39,10 @@ startHue().then(_ => {
 class HueLightStepBrightness extends HueLight {
     execute(step) {
         switch(step) {
-            case 1: this.setState(this.state.on ? {on: false} : {brightness: 100, on: true}); break;
-            case 2: this.setState({brightness: 50, on: true}); break;
-            case 3: this.setState({brightness: 30, on: true}); break;
-            case 4: this.setState({brightness: 5, on: true}); break;
+            case 1: this.setState(this.state.on ? {on: false} : {bri: 254, on: true}); break;
+            case 2: this.setState({bri: 127, on: true}); break;
+            case 3: this.setState({bri: 76, on: true}); break;
+            case 4: this.setState({bri: 12, on: true}); break;
             default: this.setState({on: false});
         }
     }
