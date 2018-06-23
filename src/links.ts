@@ -28,7 +28,6 @@ export class Links {
     }
 
     checkLightsState() {
-        console.log('---');
         this.links.forEach((link) => {
             link.light.checkState();
         });

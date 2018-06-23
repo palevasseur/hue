@@ -55,14 +55,25 @@ export abstract class HueLight implements Light {
             this.state[key] = state[key];
         });
 
-        hueApi.setLightState(this.lightId, state).then(res => console.log(`Light on=${this.state.on} bri=${this.state.bri}`));
+        return hueApi.setLightState(this.lightId, state).then(res => console.log(`Light on=${this.state.on} bri=${this.state.bri}`));
     }
 
     public checkState() {
         hueApi.lightStatus(this.lightId).then(({state, name}: {state:ILightState, name: string}) => {
-            let mes = `Light ${this.lightId} (${name}), state: on=${state.on}, bri=${state.bri}, reachable=${state.reachable}`;
-            mes += state.on == this.state.on && state.bri == this.state.bri ? '' : ` DON'T MATCH saved state: on=${this.state.on}, bri=${this.state.bri}`;
-            console.log(mes);
+            if(!state.reachable) {
+                console.log(`Light ${this.lightId} (${name}), NOT reachable`);
+                return;
+            }
+
+            const match = state.on == this.state.on && (state.bri == this.state.bri || state.on == false);
+            if(!match) {
+                this.setState({on: this.state.on, bri: this.state.bri});
+
+                let mes = `Light ${this.lightId} (${name}), state: on=${state.on}, bri=${state.bri}, reachable=${state.reachable}`;
+                mes +=  ` DON'T MATCH => reset state with: on=${this.state.on}, bri=${this.state.bri}`;
+                console.log(mes);
+            }
+
          });
     }
 }
