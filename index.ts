@@ -27,15 +27,17 @@ startHue().then(_ => {
 
     // Simulation Presence
     links.add(new Link(DeviceID.switch1, [
+        new Scenario.SimulationPresence(LightId.bureau, [
+            {time: '21:00', state:{bri: 254, on: true}},
+            {time: '21:40', state:{on: false}},
+            {time: '23:00', state:{bri: 100, on: true}},
+            {time: '23:30', state:{on: false}},
+        ], true), // activate simulation on init
         new Scenario.SimulationPresence(LightId.canape, [
-            {time: '18:30', state:{bri: 254, on: true}},
-            {time: '19:30', state:{on: false}},
-        ]),
-        new Scenario.SimulationPresence(LightId.salon, [
-            {time: '19:00', state:{bri: 254, on: true}},
-            {time: '20:00', state:{bri: 76, on: true}},
-            {time: '22:30', state:{on: false}},
-        ]),
+            {time: '21:30', state:{bri: 254, on: true}},
+            {time: '22:10', state:{bri: 76, on: true}},
+            {time: '23:35', state:{on: false}},
+        ], true), // activate simulation on init
     ]));
 
     // double button salon/canape
@@ -123,9 +125,12 @@ namespace Scenario {
             clearTimeout(this.pendingWaitTimeOut);
             this.pendingWaitTimeOut = setTimeout(_ => resolve(), getNextTime(time));
         });
-        private simulationOn = false;
-        constructor(link, private scenario: ScenarioStep[]) {
+        constructor(link, private scenario: ScenarioStep[], private simulationOn: boolean = false) {
             super(link);
+
+            if(simulationOn) {
+                this.simulation(scenario);
+            }
         }
 
         execute(step) {
