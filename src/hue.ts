@@ -15,8 +15,8 @@ export function startHue() : Promise<any> {
             hueApi.getConfig()
                 .then(conf => {
                     //console.log('Config: ' + JSON.stringify(conf, null, 2));
-                    //api.registeredUsers().then(users => console.log('Users: ' + JSON.stringify(users, null, 2)));
-                    //api.getFullState().then(states => console.log('States: ' + JSON.stringify(states, null, 2)));
+                    //hueApi.registeredUsers().then(users => console.log('Users: ' + JSON.stringify(users, null, 2)));
+                    //hueApi.getFullState().then(states => console.log('States: ' + JSON.stringify(states, null, 2)));
 
                     // test: light off, then on
                     const state = hue.lightState.create();
@@ -35,6 +35,7 @@ export function startHue() : Promise<any> {
 export interface ILightState {
     on?: boolean,
     bri?: number, // 0-254
+    ct?: number, // spot:153-454
     reachable?: boolean,
     name?: string
 }
@@ -55,7 +56,7 @@ export abstract class HueLight implements Light {
             this.state[key] = state[key];
         });
 
-        return hueApi.setLightState(this.lightId, state).then(res => console.log(`Light on=${this.state.on} bri=${this.state.bri}`));
+        return hueApi.setLightState(this.lightId, state).then(res => console.log(`Set light ${this.lightId}: on=${this.state.on} bri=${this.state.bri}`));
     }
 
     public checkState() {

@@ -24,17 +24,21 @@ export class Links {
             return;
         }
 
-        link.light.execute(step);
+        link.lights.forEach(l => l.execute(step));
     }
 
     checkLightsState() {
         this.links.forEach((link) => {
-            link.light.checkState();
+            link.lights.forEach(l => l.checkState());
         });
     }
 }
 
 export class Link {
-    constructor(readonly deviceSid: string, readonly light: Light) {
+    readonly deviceSid: string;
+    readonly lights: Light[];
+    constructor(deviceSid: string, light: Light | Light[]) {
+        this.deviceSid =deviceSid;
+        this.lights = Array.isArray(light) ? light : [light];
     }
 }

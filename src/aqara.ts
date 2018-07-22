@@ -1,5 +1,5 @@
 // https://github.com/palevasseur/node-lumi-aqara
-import {Aqara} from "../deps/lumi-aqara";
+import Aqara = require("lumi-aqara");
 let aqara = null;
 
 export function startAqara(links) : Promise<any> {
