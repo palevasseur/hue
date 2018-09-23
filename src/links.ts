@@ -38,7 +38,7 @@ export class Link {
     readonly deviceSid: string;
     readonly lights: Light[];
     constructor(deviceSid: string, light: Light | Light[]) {
-        this.deviceSid =deviceSid;
+        this.deviceSid = deviceSid;
         this.lights = Array.isArray(light) ? light : [light];
     }
 }
