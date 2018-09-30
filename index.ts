@@ -28,20 +28,31 @@ startHue().then(_ => {
 
     // Simulation Presence
     links.add(new Link(DeviceID.switch1, [
-        /*new Scenario.SimulationPresence(LightId.tableCuisine, [
-            {time: 'SUNSET', state:{bri: 254, on: true}},
-            {time: 'SUNSET+01:10', state:{on: false}},
-            {time: '23:00', state:{bri: 100, on: true}},
-            {time: '23:30', state:{on: false}},
-        ], true),*/
+        //new Scenario.SimulationPresence(LightId.tableCuisine, [
+        //    {time: 'SUNSET', state:{bri: 254, on: true}},
+        //    {time: 'SUNSET+01:10', state:{on: false}},
+        //    {time: '23:00', state:{bri: 100, on: true}},
+        //    {time: '23:30', state:{on: false}},
+        //], true),
         new Scenario.SimulationPresence(LightId.canape, [
             {time: 'SUNSET', state:{bri: 100, on: true}},
             {time: 'SUNSET+00:20', state:{bri: 254, on: true}},
             {time: '20:30', state:{bri: 127, on: true}},
-            {time: '23:00', state:{bri: 76, on: true}},
-            {time: '23:30', state:{on: false}},
+            {time: '22:50', state:{bri: 76, on: true}},
+            {time: '23:00', state:{on: false}},
         ], true),
     ]));
+
+    // spot bureau test
+    /*links.add(new Link(DeviceID.switch1, [
+        new Scenario.SimulationPresence(LightId.spot1, [
+            {time: '11:10', state:{bri: 100, on: true}},
+            {time: '11:11', state:{bri: 254, on: true}},
+            {time: '11:12', state:{bri: 127, on: true}},
+            {time: '11:13', state:{bri: 76, on: true}},
+            {time: '11:14', state:{on: false}},
+        ], true),
+    ]));*/
 
     // double button salon/canape
     links.add(new Link(DeviceID.switch2_left, new Scenario.Brightness(LightId.canape)));
@@ -112,16 +123,16 @@ namespace Scenario {
         return hours * 60 * 60 * 1000 + minutes * 60 * 1000;
     }
 
-    // inputTime: 'hh:mm' | 'SUNSET+00:30' | 'SUNSET-00:30'
-    function getNextTime(inputTime: string, lastStepOfTheDay: boolean): number {
-        const input = /(SUNSET[+-])?(\d{2}:\d{2})/.exec(inputTime); // [1] = SUNSET+ | SUNSET-, [2] = '00:30'
-        if(!input || !input[2]) {
+    // inputTime: 'hh:mm' | 'SUNSET+00:30' | 'SUNSET-00:30' | 'SUNSET'
+    function getNextTime(inputTime: string, nextDay: boolean): number {
+        const input = /(SUNSET[+-])?(\d{2}:\d{2})|(SUNSET)/.exec(inputTime); // [1] = SUNSET+ | SUNSET-, [2] = '00:30', [3] = SUNSET
+        if(!input || (!input[2] && !input[3])) {
             console.warn('Bad input time = ' + inputTime + ', ex: "SUNSET+00:30"');
             return 0;
         }
 
-        const sunset = !!input[1];
-        const inputHourMin = input[2];
+        const sunset = !!input[1] || !!input[3];
+        const inputHourMin = input[2] || '00:00';
         const operator = /SUNSET-/.test(inputTime) ? -1 : 1;
 
         const now = new Date();
@@ -133,18 +144,18 @@ namespace Scenario {
         let nextTime;
         if(nowHourMin <= hourMin) {
             nextTime = hourMin - nowHourMin;
-            console.log(inputTime + ' => next time = ' + (new Date(Date.now() + nextTime)).toLocaleTimeString());
+            console.log('                    ' + inputTime + ' => next time = ' + (new Date(Date.now() + nextTime)).toLocaleTimeString() + ', in ' + nextTime/1000 + 's');
 
         }
         else {
-            if(lastStepOfTheDay) {
+            if(nextDay) {
                 const time24h = 24 * 60 * 60 * 1000;
                 nextTime = hourMin + time24h - nowHourMin;
-                console.log(inputTime + ' => next time = ' + (new Date(Date.now() + nextTime)).toLocaleTimeString() + ' (tomorrow)');
+                console.log('                    ' + inputTime + ' => next time = ' + (new Date(Date.now() + nextTime)).toLocaleTimeString() + ' (tomorrow), in ' + nextTime/1000 + 's');
             }
             else {
                 nextTime = 0;
-                console.log(inputTime + ' => next time = 0 (next time already passed => go to next step)');
+                console.log('                    ' + inputTime + ' => next time = 0 (next time already passed => go to next step)');
             }
         }
 
@@ -160,9 +171,9 @@ namespace Scenario {
     type ScenarioStep = {state?: ILightState, time?: string};
     export class SimulationPresence extends HueLight {
         private pendingWaitTimeOut = null;
-        private wait = (time: string, lastStepOfTheDay: boolean) => new Promise(resolve => {
+        private wait = (time: string, nextDay: boolean) => new Promise(resolve => {
             clearTimeout(this.pendingWaitTimeOut);
-            this.pendingWaitTimeOut = setTimeout(_ => resolve(), getNextTime(time, lastStepOfTheDay));
+            this.pendingWaitTimeOut = setTimeout(_ => resolve(), getNextTime(time, nextDay));
         });
         constructor(link, private scenario: ScenarioStep[], private initWithSimulationActivated: boolean = false) {
             super(link);
@@ -178,51 +189,56 @@ namespace Scenario {
                 case 1:
                     if(!this.initWithSimulationActivated) {
                         this.initWithSimulationActivated = true;
-                        console.log('Light' + this.lightId + ': simulation switch ON');
+                        console.log('Simulation, light' + this.lightId + ': switch ON');
                         // todo: need start blinking scenario
                         this.simulation(this.scenario);
                     }
                     else {
-                        console.log('Light' + this.lightId + ': simulation already ON');
+                        console.log('Simulation, light' + this.lightId + ': already ON');
                     }
                     break;
                 case 2:
                     if(this.initWithSimulationActivated) {
-                        console.log('Light' + this.lightId + ': simulation switch OFF');
+                        console.log('Simulation, light' + this.lightId + ': switch OFF');
                         // todo: need end blinking scenario
                         this.initWithSimulationActivated = false;
                         clearTimeout(this.pendingWaitTimeOut);
                     }
                     else {
-                        console.log('Light' + this.lightId + ': simulation already OFF');
+                        console.log('Simulation, light' + this.lightId + ': already OFF');
                     }
                     break;
             }
         }
 
-        private simulation(steps: Array<ScenarioStep>, it = 0)
+        private simulation(steps: Array<ScenarioStep>, it = 0, nextDay = false)
         {
             if(!this.initWithSimulationActivated) {
                 return;
             }
 
             if(!steps.length || !steps[0].time) {
-                console.log('Light' + this.lightId + ': simulation: empty scenario !');
+                console.log('Simulation, light' + this.lightId + ': empty scenario !');
                 return;
             }
 
             if(steps[it]) {
-                console.log('Light' + this.lightId + ': simulation next step = ' + it + ' : ' + JSON.stringify(steps[it]));
-                this.wait(steps[it].time, !steps[it+1]).then(_ => {
+                console.log('Simulation, light' + this.lightId + ': wait next step = step ' + it + ' | ' + JSON.stringify(steps[it]));
+                this.wait(steps[it].time, nextDay).then(_ => {
+                    console.log('Simulation, light' + this.lightId + ': apply step ' + it + ' | ' + JSON.stringify(steps[it]));
                     this.setState(steps[it].state);
-                    this.simulation(steps, ++it);
+
+                    if(steps[it+1]) {
+                        this.simulation(steps, it+1);
+                    }
+                    else {
+                        // end for today, restart scenario for next day
+                        console.log('Simulation, light' + this.lightId + ': end => restart scenario for next day');
+                        this.simulation(steps, 0, true);
+                    }
                 });
             }
-            else {
-                // end for today, restart scenario for next day
-                console.log('Light' + this.lightId + ': simulation step end => restart scenario for next day');
-                this.simulation(steps);
-            }
+
         }
     }
 
