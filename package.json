@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "tsc",
     "start": "node index.js",
     "copy_to_DS715": "xcopy . \\\\192.168.1.15\\home\\NodeProjects\\hue\\ /e"
   },
@@ -23,5 +23,8 @@
     "lumi-aqara": "git+https://github.com/palevasseur/node-lumi-aqara.git",
     "node-hue-api": "^2.4.2",
     "suncalc": "^1.8.0"
+  },
+  "devDependencies": {
+    "typescript": "^3.4.1"
   }
 }
