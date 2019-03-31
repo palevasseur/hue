@@ -10,9 +10,13 @@ export function startAqara(links) : Promise<any> {
             gateway.on('ready', () => {
                 console.log('Aqara gateway is ready');
                 gateway.setPassword('ovrgkuxg5mbm754i');
-                gateway.setColor({ r: 255, g: 0, b: 0 });
-                gateway.setIntensity(100);
-                gateway.setSound(11,50); // 11 : Knock at the door | 50 : volume (0-100)
+
+                gateway.setColor({ r: 0, g: 255, b: 0 });
+                gateway.setIntensity(50);
+                setTimeout(_ => gateway.setIntensity(0), 60000);
+
+                //gateway.setSound(11,10); // 11 : Knock at the door | 10 : volume (0-100)
+
                 resolve();
             });
 

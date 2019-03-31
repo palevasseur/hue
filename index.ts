@@ -7,8 +7,10 @@ import {HueLight, ILightState, startHue} from "./src/hue";
 // Xiaomi buttons
 const DeviceID = {
     switch1: '158d0001833eb0',
-    switch2_left: '158d0001f3f503_left',
-    switch2_right: '158d0001f3f503_right',
+    switch2: '158d000183ac37',
+    switch3: '158d000183c11d',
+    switch_left: '158d0001f3f503_left',
+    switch_right: '158d0001f3f503_right',
     switchGeneral: 'xxx' // todo
 };
 
@@ -36,7 +38,7 @@ wait(30000).then(_ => {
         const links = new Links();
 
         // Simulation Presence
-        /*links.add(new Link(DeviceID.switch1, [
+        links.add(new Link(DeviceID.switch1, [
             //new Scenario.SimulationPresence(LightId.tableCuisine, [
             //    {time: 'SUNSET', state:{bri: 254, on: true}},
             //    {time: 'SUNSET+01:10', state:{on: false}},
@@ -50,7 +52,7 @@ wait(30000).then(_ => {
                 {time: '22:50', state:{bri: 76, on: true}},
                 {time: '23:00', state:{on: false}},
             ], true),
-        ]));*/
+        ]));
 
         // spot bureau test
         /*links.add(new Link(DeviceID.switch1, [
@@ -63,10 +65,11 @@ wait(30000).then(_ => {
             ], true),
         ]));*/
 
-        // double button salon/canape
-        links.add(new Link(DeviceID.switch1, new Scenario.Brightness(LightId.spot2)));
-        links.add(new Link(DeviceID.switch2_left, new Scenario.Brightness(LightId.canape)));
-        links.add(new Link(DeviceID.switch2_right, new Scenario.Brightness(LightId.salon)));
+        // switches
+        links.add(new Link(DeviceID.switch2, new Scenario.Brightness(LightId.spot2)));
+        links.add(new Link(DeviceID.switch3, new Scenario.Brightness(LightId.tableCuisine)));
+        links.add(new Link(DeviceID.switch_left, new Scenario.Brightness(LightId.canape)));
+        links.add(new Link(DeviceID.switch_right, new Scenario.Brightness(LightId.salon)));
 
         // general switch
         /*links.add(new Link(DeviceID.switchGeneral, [
