@@ -22,58 +22,69 @@ const LightId = {
     spot2: 5,
 };
 
+function wait(timeMs) : Promise<any> {
+    return new Promise((resolve, reject) => {
+        setTimeout(_ => resolve(), timeMs);
+    });
+}
 
-startHue().then(_ => {
-    const links = new Links();
+// wait 30s to ensure pc boot terminated and avoid hue search failure
+console.log('Wait 30s before starting...');
+wait(30000).then(_ => {
+    console.log('Starting hue...');
+    startHue().then(_ => {
+        const links = new Links();
 
-    // Simulation Presence
-    links.add(new Link(DeviceID.switch1, [
-        //new Scenario.SimulationPresence(LightId.tableCuisine, [
-        //    {time: 'SUNSET', state:{bri: 254, on: true}},
-        //    {time: 'SUNSET+01:10', state:{on: false}},
-        //    {time: '23:00', state:{bri: 100, on: true}},
-        //    {time: '23:30', state:{on: false}},
-        //], true),
-        new Scenario.SimulationPresence(LightId.canape, [
-            {time: 'SUNSET', state:{bri: 100, on: true}},
-            {time: 'SUNSET+00:20', state:{bri: 254, on: true}},
-            {time: '20:30', state:{bri: 127, on: true}},
-            {time: '22:50', state:{bri: 76, on: true}},
-            {time: '23:00', state:{on: false}},
-        ], true),
-    ]));
+        // Simulation Presence
+        /*links.add(new Link(DeviceID.switch1, [
+            //new Scenario.SimulationPresence(LightId.tableCuisine, [
+            //    {time: 'SUNSET', state:{bri: 254, on: true}},
+            //    {time: 'SUNSET+01:10', state:{on: false}},
+            //    {time: '23:00', state:{bri: 100, on: true}},
+            //    {time: '23:30', state:{on: false}},
+            //], true),
+            new Scenario.SimulationPresence(LightId.canape, [
+                {time: 'SUNSET', state:{bri: 100, on: true}},
+                {time: 'SUNSET+00:20', state:{bri: 254, on: true}},
+                {time: '20:30', state:{bri: 127, on: true}},
+                {time: '22:50', state:{bri: 76, on: true}},
+                {time: '23:00', state:{on: false}},
+            ], true),
+        ]));*/
 
-    // spot bureau test
-    /*links.add(new Link(DeviceID.switch1, [
-        new Scenario.SimulationPresence(LightId.spot1, [
-            {time: '11:10', state:{bri: 100, on: true}},
-            {time: '11:11', state:{bri: 254, on: true}},
-            {time: '11:12', state:{bri: 127, on: true}},
-            {time: '11:13', state:{bri: 76, on: true}},
-            {time: '11:14', state:{on: false}},
-        ], true),
-    ]));*/
+        // spot bureau test
+        /*links.add(new Link(DeviceID.switch1, [
+            new Scenario.SimulationPresence(LightId.spot1, [
+                {time: '11:10', state:{bri: 100, on: true}},
+                {time: '11:11', state:{bri: 254, on: true}},
+                {time: '11:12', state:{bri: 127, on: true}},
+                {time: '11:13', state:{bri: 76, on: true}},
+                {time: '11:14', state:{on: false}},
+            ], true),
+        ]));*/
 
-    // double button salon/canape
-    links.add(new Link(DeviceID.switch2_left, new Scenario.Brightness(LightId.canape)));
-    links.add(new Link(DeviceID.switch2_right, new Scenario.Brightness(LightId.salon)));
+        // double button salon/canape
+        links.add(new Link(DeviceID.switch1, new Scenario.Brightness(LightId.spot2)));
+        links.add(new Link(DeviceID.switch2_left, new Scenario.Brightness(LightId.canape)));
+        links.add(new Link(DeviceID.switch2_right, new Scenario.Brightness(LightId.salon)));
 
-    // general switch
-    links.add(new Link(DeviceID.switchGeneral, [
-        new Scenario.OnOff(LightId.tableCuisine),
-        new Scenario.OnOff(LightId.canape),
-        new Scenario.OnOff(LightId.salon),
-        new Scenario.OnOff(LightId.spot1),
-        new Scenario.OnOff(LightId.spot2),
-    ]));
+        // general switch
+        /*links.add(new Link(DeviceID.switchGeneral, [
+            new Scenario.OnOff(LightId.tableCuisine),
+            new Scenario.OnOff(LightId.canape),
+            new Scenario.OnOff(LightId.salon),
+            new Scenario.OnOff(LightId.spot1),
+            new Scenario.OnOff(LightId.spot2),
+        ]));*/
 
-    setTimeout(_ => {
-        console.log('Reset all states');
-        links.checkLightsState()
-    }, 60 * 1000);
+        setTimeout(_ => {
+            console.log('Reset all states');
+            links.checkLightsState()
+        }, 60 * 1000);
 
-    startAqara(links).then(_ => {
-        console.log('HUE + AQARA initialized');
+        startAqara(links).then(_ => {
+            console.log('HUE + AQARA initialized');
+        });
     });
 });
 
