@@ -5,3 +5,5 @@ build
 src/*.js
 /index.js
 *.js.map
+
+config.json

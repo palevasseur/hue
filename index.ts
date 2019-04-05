@@ -2,83 +2,52 @@ import {Link, Links} from "./src/links";
 import {startAqara} from "./src/aqara";
 import SunCalc = require("suncalc");
 import {HueLight, ILightState, startHue} from "./src/hue";
+import {DeviceLight, DeviceSwitch, loadConfig} from "./src/config";
+import {wait} from "./src/utils";
 
-// ================
-// Xiaomi buttons
-const DeviceID = {
-    switch1: '158d0001833eb0',
-    switch2: '158d000183ac37',
-    switch3: '158d000183c11d',
-    switch_left: '158d0001f3f503_left',
-    switch_right: '158d0001f3f503_right',
-    switchGeneral: 'xxx' // todo
-};
+const config = loadConfig();
 
-// ===========
-// Hue lights
-const LightId = {
-    salon: 1,
-    tableCuisine: 2,
-    canape: 3,
-    spot1: 4,
-    spot2: 5,
-};
-
-function wait(timeMs) : Promise<any> {
-    return new Promise((resolve, reject) => {
-        setTimeout(_ => resolve(), timeMs);
-    });
-}
-
-// wait 30s to ensure pc boot terminated and avoid hue search failure
-console.log('Wait 30s before starting...');
-wait(30000).then(_ => {
+// wait to ensure pc boot terminated and avoid hue search failure
+const delayToSTart = config.delayToStartMS || 30000;
+console.log('Wait ' + delayToSTart + 'ms before starting...');
+wait(delayToSTart).then(_ => {
     console.log('Starting hue...');
     startHue().then(_ => {
         const links = new Links();
+        const switches: DeviceSwitch[] = <DeviceSwitch[]>config.devices.filter(device => device.type == 'switch');
+        const lights: DeviceLight[] = <DeviceLight[]>config.devices.filter(device => device.type == 'light');
+        const getLightId = (name: string) => {
+            const light = lights.filter(light => light.name == name)[0];
+            return light ? parseInt(light.id) : -1
+        };
 
-        // Simulation Presence
-        links.add(new Link(DeviceID.switch1, [
-            //new Scenario.SimulationPresence(LightId.tableCuisine, [
-            //    {time: 'SUNSET', state:{bri: 254, on: true}},
-            //    {time: 'SUNSET+01:10', state:{on: false}},
-            //    {time: '23:00', state:{bri: 100, on: true}},
-            //    {time: '23:30', state:{on: false}},
-            //], true),
-            new Scenario.SimulationPresence(LightId.canape, [
-                {time: 'SUNSET', state:{bri: 100, on: true}},
-                {time: 'SUNSET+00:20', state:{bri: 254, on: true}},
-                {time: '20:30', state:{bri: 127, on: true}},
-                {time: '22:50', state:{bri: 76, on: true}},
-                {time: '23:00', state:{on: false}},
-            ], true),
-        ]));
+        switches.forEach(device => {
+            // todo: need to redef: trigger an action => target attached to scenario (scenario execute / action props)
+            let targets = null;
+            switch (device.scenario) {
+                case 'simulation presence':
+                    targets = device.targets.map(target => new Scenario.SimulationPresence(getLightId(target), [
+                            {time: 'SUNSET', state:{bri: 100, on: true}},
+                            {time: 'SUNSET+00:20', state:{bri: 254, on: true}},
+                            {time: '20:30', state:{bri: 127, on: true}},
+                            {time: '22:50', state:{bri: 76, on: true}},
+                            {time: '23:00', state:{on: false}},
+                        ], true),
+                    );
+                    break;
+                case 'brightness':
+                    targets = device.targets.map(target => new Scenario.Brightness(getLightId(target)));
+                    break;
+                case 'on/off':
+                    targets = device.targets.map(target => new Scenario.OnOff(getLightId(target)));
+                    break;
+            }
 
-        // spot bureau test
-        /*links.add(new Link(DeviceID.switch1, [
-            new Scenario.SimulationPresence(LightId.spot1, [
-                {time: '11:10', state:{bri: 100, on: true}},
-                {time: '11:11', state:{bri: 254, on: true}},
-                {time: '11:12', state:{bri: 127, on: true}},
-                {time: '11:13', state:{bri: 76, on: true}},
-                {time: '11:14', state:{on: false}},
-            ], true),
-        ]));*/
-
-        // switches
-        links.add(new Link(DeviceID.switch2, new Scenario.Brightness(LightId.spot2)));
-        links.add(new Link(DeviceID.switch3, new Scenario.Brightness(LightId.tableCuisine)));
-        links.add(new Link(DeviceID.switch_left, new Scenario.Brightness(LightId.canape)));
-        links.add(new Link(DeviceID.switch_right, new Scenario.Brightness(LightId.salon)));
-
-        // general switch
-        /*links.add(new Link(DeviceID.switchGeneral, [
-            new Scenario.OnOff(LightId.tableCuisine),
-            new Scenario.OnOff(LightId.canape),
-            new Scenario.OnOff(LightId.salon),
-            new Scenario.OnOff(LightId.spot1),
-            new Scenario.OnOff(LightId.spot2),
-        ]));*/
+            if(targets) {
+                console.log(' -> add Link "' + device.name + '" (' + device.id + ') => ' + device.targets);
+                links.add(new Link(device.id, targets));
+            }
+        });
 
         setTimeout(_ => {
             console.log('Reset all states');

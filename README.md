@@ -4,6 +4,7 @@
 
 ### Gateway configuration
 Need to set Mi Home application to "Chinese Mainland" to be able to detect the gateway
+https://www.openhab.org/addons/bindings/mihome/
 
 ### Switch configuration
 Add switch "interrupteur télécommandé sans fil Aqara"
@@ -15,6 +16,13 @@ Add switch "interrupteur télécommandé sans fil Aqara"
 - launch "node index.js" to check SID of new switch
 
 # Compile and run
-- [git clone https://github.com/palevasseur/hue.git]
-- [npm run compile]
-- [node index.js]
+[git clone https://github.com/palevasseur/hue.git]  
+[npm run compile]  
+[node index.js]  
+
+# Related
+https://github.com/peter-murray/node-hue-api  
+https://github.com/marvinroger/node-lumi-aqara  
+
+https://github.com/aholstenson/miio  
+https://github.com/ioBroker/ioBroker.zigbee  
