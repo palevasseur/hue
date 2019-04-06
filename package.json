@@ -6,6 +6,8 @@
   "scripts": {
     "compile": "tsc",
     "start": "node index.js",
+    "create bundle back": "tsc & webpack --config ./webpack-back.config.js",
+    "copy bundles to Raspberry (need https://lftp.nwgat.ninja/)": "lftp -e \"set sftp:auto-confirm yes; set sftp:connect-program 'ssh'; open sftp://pi:p0sspi@192.168.1.16:22; cd Projects/hue; put ./dist/bundle-hue-back.js; bye\"",
     "copy_to_DS715": "xcopy . \\\\192.168.1.15\\home\\NodeProjects\\hue\\ /e"
   },
   "repository": {
@@ -26,6 +28,9 @@
     "suncalc": "^1.8.0"
   },
   "devDependencies": {
-    "typescript": "^3.4.1"
+    "typescript": "^3.4.1",
+    "webpack-cli": "^3.3.0",
+    "webpack": "^4.29.6",
+    "webpack-node-externals": "^1.7.2"
   }
 }
