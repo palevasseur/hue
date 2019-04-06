@@ -20,6 +20,26 @@ Add switch "interrupteur télécommandé sans fil Aqara"
 [npm run compile]  
 [node index.js]  
 
+# Deploy on Raspberry
+### deploy
+on raspberry:
+ - install modules [npm install --only=production]
+ - copy the bundles using lftp
+```
+cmd to ftp dist/bundle files into ~/Projects/hue folder (hue folder must exist):
+lftp -e "set sftp:auto-confirm yes; set sftp:connect-program 'ssh'; open sftp://pi:password@192.168.1.16:22; cd Projects/hue; put ./dist/bundle-hue-back.js; bye"
+```
+
+### install lftp on Window
+- download zip https://lftp.nwgat.ninja/ and unzip to C:\Program Files
+- add PATH env var "C:\Program Files\lftp-4.7.7.win64-openssl\bin"
+
+
+### launch script on boot
+add cron task: [sudo crontab -e]
+```
+@reboot /usr/bin/node /home/pi/Projects/hue/bundle-hue-back.js > /home/pi/Projects/hue/hue.log 2>&1 &
+```
 # Related
 https://github.com/peter-murray/node-hue-api  
 https://github.com/marvinroger/node-lumi-aqara  
