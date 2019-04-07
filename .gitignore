@@ -4,7 +4,8 @@ build
 dist
 .idea
 src/*.js
+src/scenario/*.js
 /index.js
 *.js.map
 
-config.json
+configHue.json

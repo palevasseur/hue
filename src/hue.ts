@@ -45,8 +45,10 @@ export abstract class HueLight implements Light {
         on: false,
         bri: 254
     };
+    readonly lightId: number;
 
-    constructor(readonly lightId: number) {
+    constructor(lightId: string) {
+        this.lightId = parseInt(lightId);
     }
 
     abstract execute(step: number);

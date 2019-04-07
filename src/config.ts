@@ -1,31 +1,42 @@
 const fs = require('fs');
 
-const CONFIG_PATH_NAME = './config.json';
-type LightName = 'salon' | 'canape' | 'table cuisine' | 'spot1' | 'spot2';
-type ScenarioName = 'simulation presence' | 'brightness' | 'on/off';
+const CONFIG_PATH_NAME = './configHue.json';
 
-export type DeviceLight = {
-    type: 'light'; // todo: generalize: hue_spot...
-    name: LightName;
-    id: string;
-}
-export type DeviceSwitch = {
-    type: 'switch'; // todo: generalize: xiaomi_sw86...
-    name: string;
+export type TriggerName = 'simulation on/off' | 'bureau' | 'cuisine' | 'salon' | 'canape';
+export type TargetName = 'salon' | 'canape' | 'table cuisine' | 'spot1' | 'spot2';
+export type ScenarioName = 'simulation presence' | 'brightness' | 'on/off';
+
+export type Trigger = {
+    type: 'switch'; // todo: generalize: xiaomi_86sw1...
+    name: TriggerName;
     id: string;
     scenario: ScenarioName;
-    targets: LightName[]
+    targets: TargetName[]
 }
-export type Device = DeviceLight | DeviceSwitch;
 
-interface Config {
+export type Target = {
+    type: 'light'; // todo: generalize: hue_spot...
+    name: TargetName;
+    id: string;
+}
+
+// can have several connections with same trigger / different targets
+export type Connection = {
+    trigger: TriggerName,
+    target: TargetName,
+    scenario: ScenarioName
+}
+
+export interface Config {
     delayToStartMS: number;
-    devices: Device[];
+    triggers: Trigger[];
+    targets: Target[];
+    connections: Connection[];
 }
 
 const configDefault: Config = {
     delayToStartMS: 30 * 1000,
-    devices: [
+    triggers: [
         {
             type: 'switch',
             name: 'simulation on/off',
@@ -56,7 +67,10 @@ const configDefault: Config = {
             id: '158d0001f3f503_right',
             scenario: 'brightness',
             targets: ['salon']
-        }, {
+        }
+    ],
+    targets: [
+        {
             type: 'light',
             name: 'salon',
             id: '1'
@@ -77,6 +91,8 @@ const configDefault: Config = {
             name: 'spot2',
             id: '5'
         }
+    ],
+    connections: [
     ]
 };
 

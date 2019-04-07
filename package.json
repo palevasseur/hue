@@ -7,7 +7,8 @@
     "compile": "tsc",
     "start": "node index.js",
     "create bundle back": "tsc & webpack --config ./webpack-back.config.js",
-    "deploy bundles to Raspberry": "lftp -e \"set sftp:auto-confirm yes; set sftp:connect-program 'ssh'; open sftp://pi:p0sspi@192.168.1.16:22; cd Projects/hue; put ./dist/bundle-hue-back.js; bye\"",
+    "deploy bundles to Raspberry": "lftp -e \"set sftp:auto-confirm yes; set sftp:connect-program 'ssh'; open sftp://pi:p0sspi@192.168.1.16:22; cd Projects/hue; put ./dist/bundle-hue-back.js; put ./package.json; bye;\"",
+    "ssh to Raspberry": "echo ========= & echo \"Project path : [cd Projects/hue]\" & echo \"To update package : [npm install --only=production]\" & echo \"Kill process : [ps aux | grep bundle] and [sudo kill xx]\" & echo ========== & ssh pi@192.168.1.16",
     "copy_to_DS715": "xcopy . \\\\192.168.1.15\\home\\NodeProjects\\hue\\ /e"
   },
   "repository": {
@@ -21,6 +22,7 @@
   },
   "homepage": "https://github.com/palevasseur/hue#readme",
   "dependencies": {
+    "express": "^4.16.4",
     "jshue": "^2.1.1",
     "lumi-aqara": "git+https://github.com/palevasseur/node-lumi-aqara.git",
     "node-hue-api": "^2.4.2",
