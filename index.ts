@@ -9,7 +9,8 @@ import {ScenarioSimulationPresence} from "./src/scenario/ScenarioSimulationPrese
 import * as fs from "fs";
 const express = require('express');
 
-const LOG_PATH_NAME = './hue.log'; // log name defined in cron task
+const LOG__LOCAL_PATH_NAME = './hue.log';
+const LOG_RASPBERRY_PATH_NAME = '/home/pi/Projects/hue/hue.log'; // log name defined in cron task
 const config = loadConfig();
 
 // ---------------
@@ -19,15 +20,13 @@ app.get('/config', (req, res) => {
     res.send(JSON.stringify(config, null, 2));
 });
 app.get('/log', (req, res) => {
-    if(fs.existsSync(LOG_PATH_NAME)) {
-        res.send('' + fs.readFileSync(LOG_PATH_NAME)); // need to convert to string (avoid "download file")
-    }
-    else {
-        res.send('Log file "' + LOG_PATH_NAME + '" doesn\'t exist');
-    }
+    const pathLog = fs.existsSync(LOG_RASPBERRY_PATH_NAME) ? LOG_RASPBERRY_PATH_NAME : LOG__LOCAL_PATH_NAME;
+    pathLog
+        ? res.send('' + fs.readFileSync(pathLog)) // need to convert to string (avoid "download file")
+        : res.send('Log file "' + pathLog + '" doesn\'t exist');
 });
 app.listen(3000, _ => {
-    console.log('App listening on http://localhost:3000');
+    console.log('App listening on http://localhost:3000 / http://192.168.1.16:3000');
 });
 
 // -----------------
